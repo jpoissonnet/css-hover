@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hover effect</title>
+  </head>
+  <body>
+    <main>
+      <h1>Inspired by the hover effect on <a href="https://randlus.fr">ranlus.fr</a></h1>
+      <div id="wrapper">
+        <div id="funland">
+        </div>
+      </div>
+    </main>
+    <style>
+      #wrapper{
+        position: relative;
+        height: 600px;
+        overflow: hidden;
+      }
+      #funland {
+        background: linear-gradient(#a1a0a0, #3a4f61);
+        height: 100%;
+        width: 100%;
+      }
+     .wave{
+        clip-path: circle(30%);
+        width: 240px;
+        scale: 0;
+        height: 137px;
+        aspect-ratio: 16/9;
+        position: absolute;
+        top:0;
+        left: 0;
+        background-color: transparent;
+        border-radius: 20px;
+        opacity: 0;
+        animation: 1200ms ease-in-out fadeOut;
+        background-image: url("https://picsum.photos/200");
+        transition: all ease-in-out 300ms;
+        transform-origin: center center;
+     }
+      @-webkit-keyframes fadeOut {
+        0% {
+          opacity: 0;
+          scale: 0.8;
+          clip-path: circle(20%);
+        }
+        30%{
+          clip-path: circle(100%);
+          opacity: 1;
+        }
+        50% {
+          scale: 1;
+        }
+        100% {
+          opacity: 0;
+          scale:1;
+          clip-path: circle(100%);
+        }
+      }
+
+    </style>
+    <script>
+      const throttle = function(fn, delay) {
+        delay || (delay = 100);
+        let throttle = false;
+        return function(){
+          if (throttle){ return; }
+          throttle = setTimeout(function(){
+            fn.apply(this, arguments);
+            throttle = false;
+          }, delay);
+          fn.apply(this, arguments);
+        };
+      };
+
+      const wrapper = document.getElementById("wrapper")
+
+      const {x: WRAPPER_LEFT,y:WRAPPER_TOP} = wrapper.getBoundingClientRect()
+      const {x: WAVE_WIDTH,y:WAVE_HEIGHT} = {x: 240, y: 137}
+
+      const update = throttle((paramX,paramY,movX,movY) => {
+        if(!paramX || !paramY){
+          return
+        }
+        const newWave = document.createElement("div")
+        newWave.classList.add("wave")
+        newWave.style.transform = `translate(${paramX - WAVE_WIDTH/2 - WRAPPER_LEFT}px, ${paramY - WAVE_HEIGHT /2 - WRAPPER_TOP}px)`
+        newWave.style.transformOrigin = `${paramX - movX*20}px ${paramY - movY*20}px`
+
+        setTimeout(() => {
+          newWave.remove()
+        }, 2000)
+        wrapper.append(newWave)
+      }, 100)
+
+
+      const handleMouseMove = ({clientX,clientY,movementX,movementY}) => {
+        if(!clientX || !clientY){
+          return
+        }
+        if(Math.abs(movementX) < 2 || Math.abs(movementY) < 2){
+          return
+        }
+        requestAnimationFrame(() => update(clientX,clientY,movementX,movementY))
+      }
+
+      wrapper.addEventListener("mousemove", handleMouseMove)
+    </script>
+  </body>
+</html>
